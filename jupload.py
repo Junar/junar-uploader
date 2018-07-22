@@ -1,9 +1,9 @@
 from __future__ import with_statement
+from __future__ import print_function
 import sys
 import urllib2
 import csv
 import settings
-from MultipartPostHandler import *
 import requests
 import pprint
 
@@ -18,65 +18,62 @@ def post_record(r):
 
     form = dict(r)
 
-    #check if it's a webservice definition
     if form.get("type", "") == "webservice":
         return post_webservice(r)
 
-    # we will upload a simple spreadsheet data
     form['auth_key'] = settings.auth_key
-    print "uploading %s" % r.get('title').encode('utf-8')
-    file_name = r.pop("file_data", None)
+    file_name = form.pop("file_data", None)
+    title = r.get('title').encode('utf-8')
+    pp = pprint.PrettyPrinter(indent=4)
+
 
     if file_name is not None:
         try:
-            file_data = open(file_name, 'rb')
-            print "Addind data [%s] file for %s" % (file_data.name, file_name)
+            if settings.DEBUG:
+                print("SENDING ... %s" % file_name)
+                pp.pprint(form)
 
-            form['file_data'] = file_data
-            # test form['is_file'] = "1"
-            
-            pp = pprint.PrettyPrinter(indent=4)
-            print "SENDING ..."
-            pp.pprint(form)
-
-            opener = urllib2.build_opener(MultipartPostHandler())
-            response = opener.open(settings.url, form)
-            print "Respuesta:"
-            print response.read()
+            print("Uploading '%s' (%s) .... " % (title, file_name), end='')
+            sys.stdout.flush()   
+            with open(file_name, 'rb') as f:
+                r = requests.post(settings.url, files={'file': f}, data=form)
+                print('OK' if r.status_code == 201 else 'ERROR ' + str(r.status_code))
+                if settings.DEBUG or r.status_code != 201:
+                    print("Detalle")
+                    print(pp.pprint(r.json()))
         except Exception, e:
-            print "Error %s " % str(e)
-        finally:
-            file_data.close()
+            print("Error %s " % str(e))
     else:
 
         try:
+            print("Uploading %s" % title   )
             pp = pprint.PrettyPrinter(indent=4)
-            print "SENDING WEB SOURCE TO... %s" % settings.url
+            print("SENDING WEB SOURCE TO... %s" % settings.url)
             pp.pprint(form)
             response = requests.post(settings.url, data=form)
     		
-            print "Respuesta:"
-            print response.text
+            print("Respuesta:")
+            print(response.text)
         except Exception, e:
-            print "Error Web Source %s " % str(e)
+            print("Error Web Source %s " % str(e))
 
 
 def post_webservice(r):
-    print "uploading %s" % r.get('title').encode('utf-8')
+    print("uploading %s" % r.get('title').encode('utf-8'))
 
     form = dict(r)
     form['auth_key'] = settings.auth_key
 
     try:
         pp = pprint.PrettyPrinter(indent=4)
-        print "SENDING WEBSERVICE TO %s ..." % settings.url
+        print("SENDING WEBSERVICE TO %s ..." % settings.url)
         pp.pprint(form)
         response = requests.post(settings.url, data=form)
 		
-        print "Respuesta:"
-        print response.text
+        print("Respuesta:")
+        print(response.text)
     except Exception, e:
-        print "Error %s " % str(e)
+        print("Error %s " % str(e))
         
 if __name__=="__main__":
     csv_name=sys.argv[1]
