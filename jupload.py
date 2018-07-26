@@ -33,7 +33,7 @@ def post_record(r):
                 print("SENDING ... %s" % file_name)
                 pp.pprint(form)
 
-            print("Uploading '%s' (%s) .... " % (title, file_name), end='')
+            print(u"Uploading '%s' (%s) .... " % (title.decode('utf-8', 'ignore'), file_name), end='')
             sys.stdout.flush()   
             with open(file_name, 'rb') as f:
                 r = requests.post(settings.url, files={'file': f}, data=form)
@@ -46,7 +46,7 @@ def post_record(r):
     else:
 
         try:
-            print("Uploading %s" % title   )
+            print(u"Uploading %s" % title.decode('utf-8', 'ignore')   )
             pp = pprint.PrettyPrinter(indent=4)
             print("SENDING WEB SOURCE TO... %s" % settings.url)
             pp.pprint(form)
