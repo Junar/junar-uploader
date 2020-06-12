@@ -1,8 +1,8 @@
+# your auth_key. Do not expose or share this auth_key. It has special permission.
+auth_key="XXXXXXXXXXXXX"
 
-auth_key="d6337044021523c5ccaecfb0cbab5e03a1c2b6b7"
-
-# http://your_api_domain/datastreams/publish
-url="http://junarops.cloudapi.junar.com/api/v2/datasets.json"
+# http://your_api_domain/api/v2/datasets.json
+url="http://your_api_domain/api/v2/datasets.json"
 DEBUG=False
 
 	
